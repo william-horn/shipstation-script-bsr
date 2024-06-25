@@ -166,13 +166,13 @@ const parseItems = () => {
   // convert product quantities to product case amount and product remaining
   for (const key in products) {
     const productQuant = products[key];
+    let quant = null;
 
     switch (key) {
       case ProductType.Jar.name:
-        let quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
+        quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
-        console.log('quant: ', quant);
         break;
 
       case ProductType.Mini.name:
