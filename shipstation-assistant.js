@@ -168,26 +168,26 @@ const parseItems = () => {
     const productQuant = products[key];
 
     switch (key) {
-      case ProductType.Jar:
+      case ProductType.Jar.name:
         let quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
         console.log('quant: ', quant);
         break;
 
-      case ProductType.Mini:
+      case ProductType.Mini.name:
         quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
         break;
 
-      case ProductType.Bar:
+      case ProductType.Bar.name:
         quant = getNumberComponents(productQuant.original/ProductType.Bar.unit, ProductType.Bar.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
         break;
 
-      case ProductType.NotFound:
+      case ProductType.NotFound.name:
         quant = getNumberComponents(productQuant.original/ProductType.NotFound.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
