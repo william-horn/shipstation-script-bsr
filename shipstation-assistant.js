@@ -170,34 +170,27 @@ const parseItems = () => {
     switch (key) {
       case ProductType.Jar:
         let quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
-        [
-          productQuant.caseAmount, 
-          productQuant.remaining
-        ] = [quant.whole, quant.remaining];
+        productQuant.caseAmount = quant.whole;
+        productQuant.remaining = quant.remaining;
+        console.log('quant: ', quant);
         break;
 
       case ProductType.Mini:
         quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
-        [
-          productQuant.caseAmount, 
-          productQuant.remaining
-        ] = [quant.whole, quant.remaining];
+        productQuant.caseAmount = quant.whole;
+        productQuant.remaining = quant.remaining;
         break;
 
       case ProductType.Bar:
         quant = getNumberComponents(productQuant.original/ProductType.Bar.unit, ProductType.Bar.unit);
-        [
-          productQuant.caseAmount, 
-          productQuant.remaining
-        ] = [quant.whole, quant.remaining];
+        productQuant.caseAmount = quant.whole;
+        productQuant.remaining = quant.remaining;
         break;
 
       case ProductType.NotFound:
         quant = getNumberComponents(productQuant.original/ProductType.NotFound.unit);
-        [
-          productQuant.caseAmount, 
-          productQuant.remaining
-        ] = [quant.whole, quant.remaining];
+        productQuant.caseAmount = quant.whole;
+        productQuant.remaining = quant.remaining;
         break;
     }
   };
