@@ -13,33 +13,33 @@
 // Enums
 const ProductType = {
   Jar: {
+    handlingCost: 0.5,
+    weight: 8.5,
     name: 'Jar',
-    caseName: 'Jar Cases',
-    singleName: 'Jars',
     unit: 6,
     slotSpace: [1],
   },
 
   Mini: {
+    handlingCost: 1,
+    weight: 3,
     name: 'Mini',
-    caseName: 'Mini Case',
-    singleName: 'Minis',
     unit: 6,
     slotSpace: [2, 0.5]
   },
 
   Bar: {
+    handlingCost: 0.5,
+    weight: 1.8,
     name: 'Bar',
-    caseName: 'Bar Case',
-    singleName: 'Mini Case',
     unit: 12,
     slotSpace: [0.5],
   },
 
   NotFound: {
+    handlingCost: 0,
+    weight: 0,
     name: 'NotFound',
-    caseName: 'Not Found',
-    singleName: 'Not Found',
     unit: 1,
     slotSpace: [0],
   }
@@ -53,12 +53,12 @@ const ProductType = {
     - whole<int>
     - remaining<float>
 */
-const getNumberComponents = (number, scaleRemainer) => {
+const getNumberComponents = (number, scaleRemainder) => {
   const whole = Math.trunc(number);
   let remaining = Math.abs(number) - whole;
 
-  if (typeof(scaleRemainer) === 'number') {
-    remaining *= scaleRemainer;
+  if (typeof(scaleRemainder) === 'number') {
+    remaining *= scaleRemainder;
   }
 
   return {
@@ -99,6 +99,9 @@ const parseItems = () => {
   if (!shippingRateLabel) {
     shippingRateLabel = document.querySelector('p[aria-describedby="rate-card-label-cost"]')
 
+    // if no shipping rate label exists at all then error
+    if (!shippingRateLabel) throw Error('Could not find ShippingRateLabel element');
+
     // use substring on existing rate value due to dollar sign in the string
     // for ex the textContent looks like: '$10.34'
     shippingRate = Number(shippingRateLabel.textContent.substring(1));
@@ -115,7 +118,7 @@ const parseItems = () => {
   // product list mapping product type to total quantity
   /*
     products = {
-      [Jar]: {
+      'Jar': {
         caseAmount: 3,
         remaining: 4
       }
@@ -135,7 +138,7 @@ const parseItems = () => {
 
     // get the product type
     const productType = getProductType(itemLabel.textContent);
-    const productValue = Number(itemQuant.textContent);
+    const productQuantity = Number(itemQuant.textContent);
 
     // exclude any invalid product types from the final product output
     // if (productType === ProductType.NotFound) {
@@ -143,56 +146,44 @@ const parseItems = () => {
     // };
 
     // beyond this point, itemValue is a valid number
-    if (typeof(productValue) !== 'number') throw Error('ItemValue could not be converted to a number');
+    if (typeof(productQuantity) !== 'number') throw Error('ProductQuantity could not be converted to a number');
 
-    let productQuant = products[productType.name];
+    let productQuant = products[productType];
 
     // create the product data if not exists
     if (typeof(productQuant) !== 'object') {
-      products[productType.name] = {
+      products[productType] = {
         caseAmount: 0,
         remaining: 0,
         original: 0,
+        handlingCost: 0,
       };
 
-      productQuant = products[productType.name];
+      productQuant = products[productType];
     }
 
     // increase the count of the product quantity
-    productQuant.original += productValue;
+    productQuant.original += productQuantity;
   };
 
 
   // convert product quantities to product case amount and product remaining
-  for (const key in products) {
-    const productQuant = products[key];
+  for (const productType in products) {
+    const productQuant = products[productType];
+
     let quant = null;
 
-    switch (key) {
-      case ProductType.Jar.name:
-        quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
-
-      case ProductType.Mini.name:
-        quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
-
-      case ProductType.Bar.name:
-        quant = getNumberComponents(productQuant.original/ProductType.Bar.unit, ProductType.Bar.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
-
-      case ProductType.NotFound.name:
-        quant = getNumberComponents(productQuant.original/ProductType.NotFound.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
+    if (productType === ProductType.Mini) {
+      quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
+    } else {
+      quant = getNumberComponents(productQuant.original/productType.unit, productType.unit);
     }
+
+    //* note: handling cost currently does not account for remaining 6-pack mini jars
+    productQuant.caseAmount = quant.whole;
+    productQuant.remaining = quant.remaining;
+    productQuant.handlingCost = productType.handlingCost*productQuant.caseAmount;
+    shippingRate += productQuant.handlingCost;
   };
 
   return {
