@@ -31,8 +31,8 @@ const ProductType = {
   },
 
   Bar: {
-    caseWeight: 1.8,
-    singleWeight: 0.15,
+    caseWeight: 2,
+    singleWeight: 0.167,
     handlingCost: 0.5,
     weight: 1.8,
     name: 'Bar',
