@@ -23,10 +23,10 @@ const ProductType = {
 
   Mini: {
     handlingCost: 1,
-    caseWeight: 3,
+    caseWeight: 6,
     singleWeight: 0.5,
     name: 'Mini',
-    unit: 6,
+    unit: 12,
     slotSpace: [2, 0.5]
   },
 
@@ -174,13 +174,7 @@ const parseItems = () => {
     const productQuant = products[productName];
     const productType = productQuant.type;
 
-    let quant = null;
-
-    if (productType === ProductType.Mini) {
-      quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
-    } else {
-      quant = getNumberComponents(productQuant.original/productType.unit, productType.unit);
-    }
+    let quant = getNumberComponents(productQuant.original/productType.unit, productType.unit);
 
     //* note: handling cost currently does not account for remaining 6-pack mini jars
     productQuant.caseAmount = quant.whole;
