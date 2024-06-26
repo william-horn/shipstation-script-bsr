@@ -148,18 +148,19 @@ const parseItems = () => {
     // beyond this point, itemValue is a valid number
     if (typeof(productQuantity) !== 'number') throw Error('ProductQuantity could not be converted to a number');
 
-    let productQuant = products[productType];
+    let productQuant = products[productType.name];
 
     // create the product data if not exists
     if (typeof(productQuant) !== 'object') {
-      products[productType] = {
+      products[productType.name] = {
         caseAmount: 0,
         remaining: 0,
         original: 0,
         handlingCost: 0,
+        type: productType,
       };
 
-      productQuant = products[productType];
+      productQuant = products[productType.name];
     }
 
     // increase the count of the product quantity
@@ -168,8 +169,9 @@ const parseItems = () => {
 
 
   // convert product quantities to product case amount and product remaining
-  for (const productType in products) {
-    const productQuant = products[productType];
+  for (const productName in products) {
+    const productQuant = products[productName];
+    const productType = productQuant.type;
 
     let quant = null;
 
