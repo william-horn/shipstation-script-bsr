@@ -13,24 +13,36 @@
 // Enums
 const ProductType = {
   Jar: {
+    handlingCost: 0.5,
+    caseWeight: 8.15,
+    singleWeight: 1.38,
     name: 'Jar',
     unit: 6,
     slotSpace: [1],
   },
 
   Mini: {
+    handlingCost: 1,
+    caseWeight: 6,
+    singleWeight: 0.5,
     name: 'Mini',
     unit: 12,
     slotSpace: [2, 0.5]
   },
 
   Bar: {
+    caseWeight: 2,
+    singleWeight: 0.167,
+    handlingCost: 0.5,
+    weight: 1.8,
     name: 'Bar',
     unit: 12,
     slotSpace: [0.5],
   },
 
   NotFound: {
+    handlingCost: 0,
+    weight: 0,
     name: 'NotFound',
     unit: 1,
     slotSpace: [0],
@@ -165,35 +177,18 @@ const parseItems = () => {
 
 
   // convert product quantities to product case amount and product remaining
-  for (const key in products) {
-    const productQuant = products[key];
-    let quant = null;
+  for (const productName in products) {
+    const productQuant = products[productName];
+    const productType = productQuant.type;
 
-    switch (key) {
-      case ProductType.Jar.name:
-        quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
+    let quant = getNumberComponents(productQuant.original/productType.unit, productType.unit);
 
-      case ProductType.Mini.name:
-        quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
-
-      case ProductType.Bar.name:
-        quant = getNumberComponents(productQuant.original/ProductType.Bar.unit, ProductType.Bar.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
-
-      case ProductType.NotFound.name:
-        quant = getNumberComponents(productQuant.original/ProductType.NotFound.unit);
-        productQuant.caseAmount = quant.whole;
-        productQuant.remaining = quant.remaining;
-        break;
-    }
+    //* note: handling cost currently does not account for remaining 6-pack mini jars
+    productQuant.caseAmount = quant.whole;
+    productQuant.remaining = quant.remaining;
+    productQuant.handlingCost = productType.handlingCost*productQuant.caseAmount;
+    shippingRate += productQuant.handlingCost;
+    totalWeight += productQuant.caseAmount*productType.caseWeight + productQuant.remaining*productType.singleWeight;
   };
 
   return {
@@ -202,4 +197,3 @@ const parseItems = () => {
     totalWeight,
   };
 };
- 
