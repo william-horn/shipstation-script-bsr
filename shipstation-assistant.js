@@ -14,7 +14,7 @@
 const ProductType = {
   Jar: {
     handlingCost: 0.5,
-    caseWeight: 8.3,
+    caseWeight: 8.15,
     singleWeight: 1.38,
     name: 'Jar',
     unit: 6,
