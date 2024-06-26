@@ -14,7 +14,8 @@
 const ProductType = {
   Jar: {
     handlingCost: 0.5,
-    weight: 8.5,
+    caseWeight: 8,
+    singleWeight: 1.3,
     name: 'Jar',
     unit: 6,
     slotSpace: [1],
@@ -22,13 +23,16 @@ const ProductType = {
 
   Mini: {
     handlingCost: 1,
-    weight: 3,
+    caseWeight: 3,
+    singleWeight: 0.5,
     name: 'Mini',
     unit: 6,
     slotSpace: [2, 0.5]
   },
 
   Bar: {
+    caseWeight: 1.8,
+    singleWeight: 0.15,
     handlingCost: 0.5,
     weight: 1.8,
     name: 'Bar',
@@ -187,7 +191,7 @@ const parseItems = () => {
     productQuant.remaining = quant.remaining;
     productQuant.handlingCost = productType.handlingCost*productQuant.caseAmount;
     shippingRate += productQuant.handlingCost;
-    totalWeight += productQuant.caseAmount*productType.weight;
+    totalWeight += productQuant.caseAmount*productType.caseWeight + productQuant.remaining*productType.singleWeight;
   };
 
   return {
