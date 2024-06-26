@@ -94,6 +94,7 @@ const parseItems = () => {
   // shipstation rate estimate element & rate value (shipping & handling)
   let shippingRateLabel = document.querySelector('.rate-amount-R6LSuka');
   let shippingRate = 0;
+  let totalWeight = 0;
 
   // if the first rate element doesn't exist, then the order has already been shipped
   if (!shippingRateLabel) {
@@ -186,11 +187,13 @@ const parseItems = () => {
     productQuant.remaining = quant.remaining;
     productQuant.handlingCost = productType.handlingCost*productQuant.caseAmount;
     shippingRate += productQuant.handlingCost;
+    totalWeight += productQuant.caseAmount*productType.weight;
   };
 
   return {
     products,
     shippingRate,
+    totalWeight,
   };
 };
  
