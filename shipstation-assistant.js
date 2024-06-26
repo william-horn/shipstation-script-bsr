@@ -62,7 +62,7 @@ const getNumberComponents = (number, scaleRemainder) => {
   let remaining = Math.abs(number) - whole;
 
   if (typeof(scaleRemainder) === 'number') {
-    remaining *= scaleRemainder;
+    remaining = Math.floor(remaining*scaleRemainder + 0.0001);
   }
 
   return {
