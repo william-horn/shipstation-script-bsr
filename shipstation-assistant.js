@@ -106,15 +106,11 @@ const parseItems = () => {
 
     // if no shipping rate label exists at all then error
     if (!shippingRateLabel) throw Error('Could not find ShippingRateLabel element');
-
-    // use substring on existing rate value due to dollar sign in the string
-    // for ex the textContent looks like: '$10.34'
-    shippingRate = Number(shippingRateLabel.textContent.substring(1));
-
-  // otherwise, grab the existing shipping cost
-  } else {
-    shippingRate = Number(shippingRateLabel.textContent);
   }
+
+  // use substring on existing rate value due to dollar sign in the string
+  // for ex the textContent looks like: '$10.34'
+  shippingRate = Number(shippingRateLabel.textContent.substring(1));
 
   if (typeof(shippingRate) !== 'number') {
     shippingRate = 'Not Found';
