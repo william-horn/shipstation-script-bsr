@@ -13,6 +13,7 @@
 // Enums
 const ProductType = {
   Jar: {
+    caseHandlingCost: 0.5,
     name: 'Jar',
     caseName: 'Jar Cases',
     singleName: 'Jars',
@@ -21,6 +22,7 @@ const ProductType = {
   },
 
   Mini: {
+    caseHandlingCost: 1,
     name: 'Mini',
     caseName: 'Mini Case',
     singleName: 'Minis',
@@ -29,6 +31,7 @@ const ProductType = {
   },
 
   Bar: {
+    caseHandlingCost: 0.5,
     name: 'Bar',
     caseName: 'Bar Case',
     singleName: 'Mini Case',
@@ -37,6 +40,7 @@ const ProductType = {
   },
 
   NotFound: {
+    caseHandlingCost: 0,
     name: 'NotFound',
     caseName: 'Not Found',
     singleName: 'Not Found',
@@ -173,24 +177,28 @@ const parseItems = () => {
         quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
+        shippingRate += ProductType.Jar.caseHandlingCost*productQuant.caseAmount;
         break;
 
       case ProductType.Mini.name:
         quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
+        shippingRate += ProductType.Mini.caseHandlingCost*productQuant.caseAmount;
         break;
 
       case ProductType.Bar.name:
         quant = getNumberComponents(productQuant.original/ProductType.Bar.unit, ProductType.Bar.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
+        shippingRate += ProductType.Bar.caseHandlingCost*productQuant.caseAmount;
         break;
 
       case ProductType.NotFound.name:
         quant = getNumberComponents(productQuant.original/ProductType.NotFound.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
+        shippingRate += ProductType.NotFound.caseHandlingCost*productQuant.caseAmount;
         break;
     }
   };
