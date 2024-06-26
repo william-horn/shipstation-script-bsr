@@ -13,37 +13,25 @@
 // Enums
 const ProductType = {
   Jar: {
-    caseHandlingCost: 0.5,
     name: 'Jar',
-    caseName: 'Jar Cases',
-    singleName: 'Jars',
     unit: 6,
     slotSpace: [1],
   },
 
   Mini: {
-    caseHandlingCost: 1,
     name: 'Mini',
-    caseName: 'Mini Case',
-    singleName: 'Minis',
-    unit: 6,
+    unit: 12,
     slotSpace: [2, 0.5]
   },
 
   Bar: {
-    caseHandlingCost: 0.5,
     name: 'Bar',
-    caseName: 'Bar Case',
-    singleName: 'Mini Case',
     unit: 12,
     slotSpace: [0.5],
   },
 
   NotFound: {
-    caseHandlingCost: 0,
     name: 'NotFound',
-    caseName: 'Not Found',
-    singleName: 'Not Found',
     unit: 1,
     slotSpace: [0],
   }
@@ -57,12 +45,19 @@ const ProductType = {
     - whole<int>
     - remaining<float>
 */
-const getNumberComponents = (number, scaleRemainer) => {
+const getNumberComponents = (number, scaleRemainder) => {
   const whole = Math.trunc(number);
   let remaining = Math.abs(number) - whole;
 
-  if (typeof(scaleRemainer) === 'number') {
-    remaining *= scaleRemainer;
+  /*
+   ! issue: 
+   In cases where we have a repeating decimal as a result from the division,
+   for example: 4/12 (0.3333...), subtracting the whole number part from that
+   will cause weird rounding logic where 4/12 won't equal a full third.
+  */
+  if (typeof(scaleRemainder) === 'number') {
+   // this is a temporary fix
+    remaining = Math.floor(remaining*scaleRemainder + 0.0001);
   }
 
   return {
@@ -98,19 +93,19 @@ const parseItems = () => {
   // shipstation rate estimate element & rate value (shipping & handling)
   let shippingRateLabel = document.querySelector('.rate-amount-R6LSuka');
   let shippingRate = 0;
+  let totalWeight = 0;
 
   // if the first rate element doesn't exist, then the order has already been shipped
   if (!shippingRateLabel) {
     shippingRateLabel = document.querySelector('p[aria-describedby="rate-card-label-cost"]')
 
-    // use substring on existing rate value due to dollar sign in the string
-    // for ex the textContent looks like: '$10.34'
-    shippingRate = Number(shippingRateLabel.textContent.substring(1));
-
-  // otherwise, grab the existing shipping cost
-  } else {
-    shippingRate = Number(shippingRateLabel.textContent);
+    // if no shipping rate label exists at all then error
+    if (!shippingRateLabel) throw Error('Could not find ShippingRateLabel element');
   }
+
+  // use substring on existing rate value due to dollar sign in the string
+  // for ex the textContent looks like: '$10.34'
+  shippingRate = Number(shippingRateLabel.textContent.substring(1));
 
   if (typeof(shippingRate) !== 'number') {
     shippingRate = 'Not Found';
@@ -119,7 +114,7 @@ const parseItems = () => {
   // product list mapping product type to total quantity
   /*
     products = {
-      [Jar]: {
+      'Jar': {
         caseAmount: 3,
         remaining: 4
       }
@@ -139,7 +134,7 @@ const parseItems = () => {
 
     // get the product type
     const productType = getProductType(itemLabel.textContent);
-    const productValue = Number(itemQuant.textContent);
+    const productQuantity = Number(itemQuant.textContent);
 
     // exclude any invalid product types from the final product output
     // if (productType === ProductType.NotFound) {
@@ -147,7 +142,7 @@ const parseItems = () => {
     // };
 
     // beyond this point, itemValue is a valid number
-    if (typeof(productValue) !== 'number') throw Error('ItemValue could not be converted to a number');
+    if (typeof(productQuantity) !== 'number') throw Error('ProductQuantity could not be converted to a number');
 
     let productQuant = products[productType.name];
 
@@ -157,13 +152,15 @@ const parseItems = () => {
         caseAmount: 0,
         remaining: 0,
         original: 0,
+        handlingCost: 0,
+        type: productType,
       };
 
       productQuant = products[productType.name];
     }
 
     // increase the count of the product quantity
-    productQuant.original += productValue;
+    productQuant.original += productQuantity;
   };
 
 
@@ -177,28 +174,24 @@ const parseItems = () => {
         quant = getNumberComponents(productQuant.original/ProductType.Jar.unit, ProductType.Jar.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
-        shippingRate += ProductType.Jar.caseHandlingCost*productQuant.caseAmount;
         break;
 
       case ProductType.Mini.name:
         quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
-        shippingRate += ProductType.Mini.caseHandlingCost*productQuant.caseAmount;
         break;
 
       case ProductType.Bar.name:
         quant = getNumberComponents(productQuant.original/ProductType.Bar.unit, ProductType.Bar.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
-        shippingRate += ProductType.Bar.caseHandlingCost*productQuant.caseAmount;
         break;
 
       case ProductType.NotFound.name:
         quant = getNumberComponents(productQuant.original/ProductType.NotFound.unit);
         productQuant.caseAmount = quant.whole;
         productQuant.remaining = quant.remaining;
-        shippingRate += ProductType.NotFound.caseHandlingCost*productQuant.caseAmount;
         break;
     }
   };
@@ -206,6 +199,7 @@ const parseItems = () => {
   return {
     products,
     shippingRate,
+    totalWeight,
   };
 };
  
