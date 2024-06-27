@@ -6,8 +6,9 @@
   the estimated shipping cost from shipstation and adding every individual handling cost of each
   product to that value.
 
-  todo:
-    - Add algorithm for automatic package configuration 
+  ? to-do:
+    * Add algorithm for automatic package configuration 
+    * Add support for sample jars when it comes to calculating handling cost
 */
 
 // Enums
@@ -192,3 +193,4 @@ const parseItems = () => {
   };
 };
  
+parseItems();
