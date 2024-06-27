@@ -15,7 +15,8 @@
 const ProductType = {
   Jar: {
     handlingCost: 0.5,
-    weight: 8.5,
+    caseWeight: 8.15,
+    singleWeight: 1.38,
     name: 'Jar',
     unit: 6,
     slotSpace: [1],
@@ -23,13 +24,16 @@ const ProductType = {
 
   Mini: {
     handlingCost: 1,
-    weight: 3,
+    caseWeight: 6,
+    singleWeight: 0.5,
     name: 'Mini',
-    unit: 6,
+    unit: 12,
     slotSpace: [2, 0.5]
   },
 
   Bar: {
+    caseWeight: 2,
+    singleWeight: 0.167,
     handlingCost: 0.5,
     weight: 1.8,
     name: 'Bar',
@@ -58,8 +62,15 @@ const getNumberComponents = (number, scaleRemainder) => {
   const whole = Math.trunc(number);
   let remaining = Math.abs(number) - whole;
 
+  /*
+   ! issue: 
+   In cases where we have a repeating decimal as a result from the division,
+   for example: 4/12 (0.3333...), subtracting the whole number part from that
+   will cause weird rounding logic where 4/12 won't equal a full third.
+  */
   if (typeof(scaleRemainder) === 'number') {
-    remaining *= scaleRemainder;
+   // this is a temporary fix
+    remaining = Math.floor(remaining*scaleRemainder + 0.0001);
   }
 
   return {
@@ -95,6 +106,7 @@ const parseItems = () => {
   // shipstation rate estimate element & rate value (shipping & handling)
   let shippingRateLabel = document.querySelector('.rate-amount-R6LSuka');
   let shippingRate = 0;
+  let totalWeight = 0;
 
   // if the first rate element doesn't exist, then the order has already been shipped
   if (!shippingRateLabel) {
@@ -102,15 +114,11 @@ const parseItems = () => {
 
     // if no shipping rate label exists at all then error
     if (!shippingRateLabel) throw Error('Could not find ShippingRateLabel element');
-
-    // use substring on existing rate value due to dollar sign in the string
-    // for ex the textContent looks like: '$10.34'
-    shippingRate = Number(shippingRateLabel.textContent.substring(1));
-
-  // otherwise, grab the existing shipping cost
-  } else {
-    shippingRate = Number(shippingRateLabel.textContent);
   }
+
+  // use substring on existing rate value due to dollar sign in the string
+  // for ex the textContent looks like: '$10.34'
+  shippingRate = Number(shippingRateLabel.textContent.substring(1));
 
   if (typeof(shippingRate) !== 'number') {
     shippingRate = 'Not Found';
@@ -149,18 +157,19 @@ const parseItems = () => {
     // beyond this point, itemValue is a valid number
     if (typeof(productQuantity) !== 'number') throw Error('ProductQuantity could not be converted to a number');
 
-    let productQuant = products[productType];
+    let productQuant = products[productType.name];
 
     // create the product data if not exists
     if (typeof(productQuant) !== 'object') {
-      products[productType] = {
+      products[productType.name] = {
         caseAmount: 0,
         remaining: 0,
         original: 0,
         handlingCost: 0,
+        type: productType,
       };
 
-      productQuant = products[productType];
+      productQuant = products[productType.name];
     }
 
     // increase the count of the product quantity
@@ -169,28 +178,23 @@ const parseItems = () => {
 
 
   // convert product quantities to product case amount and product remaining
-  for (const productType in products) {
-    const productQuant = products[productType];
+  for (const productName in products) {
+    const productQuant = products[productName];
+    const productType = productQuant.type;
 
-    let quant = null;
-
-    if (productType === ProductType.Mini) {
-      quant = getNumberComponents(productQuant.original/(ProductType.Mini.unit*2), ProductType.Mini.unit);
-    } else {
-      quant = getNumberComponents(productQuant.original/productType.unit, productType.unit);
-    }
+    let quant = getNumberComponents(productQuant.original/productType.unit, productType.unit);
 
     //* note: handling cost currently does not account for remaining 6-pack mini jars
     productQuant.caseAmount = quant.whole;
     productQuant.remaining = quant.remaining;
     productQuant.handlingCost = productType.handlingCost*productQuant.caseAmount;
     shippingRate += productQuant.handlingCost;
+    totalWeight += productQuant.caseAmount*productType.caseWeight + productQuant.remaining*productType.singleWeight;
   };
 
   return {
     products,
     shippingRate,
+    totalWeight,
   };
 };
- 
-parseItems();
