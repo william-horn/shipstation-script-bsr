@@ -50,6 +50,324 @@ const ProductType = {
   }
 }
 
+const createUI = () => {
+  const createDraggable = (element, target) => {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    element.onmousedown = dragMouseDown;
+  
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+
+      if (e.target !== element) return;
+
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+    }
+  
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      target.style.top = (target.offsetTop - pos2) + "px";
+      target.style.left = (target.offsetLeft - pos1) + "px";
+    }
+  
+    function closeDragElement() {
+      // stop moving when mouse button is released:
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  }
+
+  document.head.innerHTML += `
+    <style>
+      :root {
+        --bg-color-primary: #1b1b21;
+        --bg-color-secondary: #141418;
+
+        --text-color-normal: #e3e6e8;
+        --text-color-normal-pop: white;
+        --text-color-mute: #585963;
+
+        --outer-frame-height__SA103: 300px;
+        --toolbar-height: 18px;
+      }
+
+      .outer-frame {
+        box-shadow: 0 0 10px black;
+        background-color: var(--bg-color-primary);
+        position: fixed;
+        right: 10px;
+        top: 10px;
+        width: 200px;
+        height: var(--outer-frame-height__SA103);
+        z-index: 99999;
+      }
+
+      .outer-frame * {
+        padding: 0;
+        margin: 0;
+        box-sizing: content-box;
+
+        font-family: monospace;
+      }
+
+      .inner-frame {
+        padding: 5px;
+        height: calc(100% - 34px);
+        overflow-y: auto;
+      }
+
+      .inner-frame > * {
+        margin-bottom: 0.7rem;
+      }
+
+      .toolbar {
+        background-color: var(--bg-color-secondary);
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+
+      .toolbar > * {
+        font-weight: 600;
+        background-color: red;
+        width: 18px;
+        height: 18px;
+      }
+
+      .body-content > * {
+        margin-bottom: 0.4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .summary-container {
+        background-color: var(--bg-color-secondary);
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        padding-inline: 1.5rem;
+      }
+
+      .summary-container > * {
+        margin-bottom: 0.3rem;
+      }
+
+      .compute-order-button {
+        margin-inline: auto;
+        text-align: center;
+        background-color: green;
+      }
+
+      .heading-primary,
+      .heading-secondary {
+        font-size: 1rem;
+        font-weight: 400;
+        color: var(--text-color-normal-pop);
+        text-align: center;
+      }
+      
+      .heading-secondary {
+        font-size: 0.8rem;
+      }
+      
+      .text-primary {
+        font-size: 0.7rem;
+        color: var(--text-color-normal);
+        text-align: center;
+      }
+      
+      .info-item {
+        padding: 0.3rem;
+        font-size: 1rem;
+      }
+      
+      .dollar-value {
+        color: #72f772;
+      }
+      
+      .quantity-value {
+        color: orange;
+      }
+      
+      .weight-value {
+        color: #ffbdf4;
+      }
+      
+      .text-left {
+        text-align: left;
+      }
+      
+      .text-right {
+        text-align: right;
+      }
+      
+      .text-mute {
+        color: var(--text-color-mute);
+      }
+    </style>
+  `;
+
+  // master frame
+  const outerFrame = document.createElement('div');
+  outerFrame.classList = 'outer-frame';
+  document.body.appendChild(outerFrame);
+
+  // toolbar 
+  const toolbar = document.createElement('div');
+  toolbar.classList = 'toolbar';
+  outerFrame.appendChild(toolbar);
+  createDraggable(toolbar, outerFrame);
+
+  const hide = document.createElement('button');
+  hide.textContent = 'H';
+  hide.classList = 'text-primary';
+  hide.style.backgroundColor = '#4d4677';
+  toolbar.appendChild(hide);
+
+  const close = document.createElement('button');
+  close.textContent = 'X';
+  close.classList = 'text-primary';
+  toolbar.appendChild(close);
+
+  // inner frame
+  const innerFrame = document.createElement('div');
+  innerFrame.classList = 'inner-frame';
+  outerFrame.appendChild(innerFrame);
+
+  // header
+  const header = document.createElement('header');
+  header.classList = 'header__container';
+  innerFrame.appendChild(header);
+
+  const headerContent = document.createElement('div');
+  headerContent.classList = 'header__content';
+  header.appendChild(headerContent);
+
+  const title = document.createElement('h2');
+  title.classList = 'heading-primary';
+  title.textContent = 'Shipstation Assistant';
+  title.style.color = '#afdaff';
+  title.style.fontWeight = '600';
+  headerContent.appendChild(title);
+
+  const credits = document.createElement('p');
+  credits.classList = 'text-primary text-mute';
+  credits.textContent = 'By: Willbur';
+  headerContent.appendChild(credits);
+
+  // UI main body content
+  const bodyContent = document.createElement('div');
+  bodyContent.classList = 'body-content';
+  innerFrame.appendChild(bodyContent);
+
+  const computeOrderButton = document.createElement('button');
+  computeOrderButton.textContent = 'Process Order';
+  computeOrderButton.classList = 'compute-order-button';
+  bodyContent.appendChild(computeOrderButton);
+
+  const orderTitle = document.createElement('h2');
+  orderTitle.classList = 'heading-primary';
+  orderTitle.textContent = 'Order: ';
+  bodyContent.appendChild(orderTitle);
+
+  const summaryContainer = document.createElement('div');
+  summaryContainer.classList = 'summary-container';
+  bodyContent.appendChild(summaryContainer);
+
+  const jarAmountLabel = document.createElement('p');
+  jarAmountLabel.classList = 'text-primary';
+  jarAmountLabel.textContent = 'Jars: ';
+  summaryContainer.appendChild(jarAmountLabel);
+
+  const jarAmountValue = document.createElement('span');
+  jarAmountValue.textContent = '0';
+  jarAmountValue.classList = 'quantity-value';
+  jarAmountLabel.appendChild(jarAmountValue);
+
+  const barAmountLabel = document.createElement('p');
+  barAmountLabel.classList = 'text-primary';
+  barAmountLabel.textContent = 'Bars: ';
+  summaryContainer.appendChild(barAmountLabel);
+
+  const barAmountValue = document.createElement('span');
+  barAmountValue.textContent = '0';
+  barAmountValue.classList = 'quantity-value';
+  barAmountLabel.appendChild(barAmountValue);
+
+  const miniAmountLabel = document.createElement('p');
+  miniAmountLabel.classList = 'text-primary';
+  miniAmountLabel.textContent = 'Minis: ';
+  summaryContainer.appendChild(miniAmountLabel);
+
+  const miniAmountValue = document.createElement('span');
+  miniAmountValue.textContent = '0';
+  miniAmountValue.classList = 'quantity-value';
+  miniAmountLabel.appendChild(miniAmountValue);
+
+  const shippingRateLabel = document.createElement('p');
+  shippingRateLabel.classList = 'text-primary';
+  shippingRateLabel.style.marginTop = '0.4rem';
+  shippingRateLabel.textContent = 'Shipping & Handling: ';
+  summaryContainer.appendChild(shippingRateLabel);
+
+  const shippingRateValue = document.createElement('span');
+  shippingRateValue.textContent = '$0.00';
+  shippingRateValue.classList = 'dollar-value';
+  shippingRateLabel.appendChild(shippingRateValue);
+
+  // logic
+  close.addEventListener('click', () => {
+    outerFrame.remove();
+  });
+
+  let hidden = false;
+  hide.addEventListener('click', () => {
+    const root = document.querySelector(':root');
+
+    if (!hidden) {
+      innerFrame.style.display = 'none';
+      root.style.setProperty('--outer-frame-height__SA103', '18px');
+    } else {
+      innerFrame.style.display = 'block';
+      root.style.setProperty('--outer-frame-height__SA103', '300px');
+    }
+    hidden = !hidden;
+  });
+
+  computeOrderButton.addEventListener('click', () => {
+    const {
+      products,
+      shippingRate,
+      totalWeight
+    } = parseItems();
+
+    jarAmountValue.textContent = products.Jar.caseAmount;
+    if (products.Jar.remaining > 0) jarAmountValue.textContent += ` (+${products.Jar.remaining})`;
+
+    barAmountValue.textContent = products.Bar.caseAmount;
+    if (products.Bar.remaining > 0) barAmountValue.textContent += ` (+${products.Bar.remaining})`;
+
+    miniAmountValue.textContent = products.Mini.caseAmount;
+    if (products.Mini.remaining > 0) miniAmountValue.textContent += ` (+${products.Mini.remaining})`;
+
+    shippingRateValue.textContent = '$' + shippingRate;
+  });
+}
+
+
 /*
   @function: getNumberComponents()
   @desc: Parses a float for it's whole number and fraction counterpart, separately.
@@ -98,6 +416,7 @@ const getProductType = (rawString) => {
   @desc: Parses the shipstation HTML
 */
 const parseItems = () => {
+
   // outer HTML of shipstation order list
   const outerList = document.querySelector('.react-table-wrapper-uZ_76Y3');
   const innerList = outerList.querySelector('div[role="rowgroup"]');
@@ -198,3 +517,5 @@ const parseItems = () => {
     totalWeight,
   };
 };
+
+createUI()
